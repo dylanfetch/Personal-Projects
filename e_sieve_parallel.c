@@ -25,7 +25,6 @@ void serialSieve(int n)
 	int j;
 	int count;
 	
-	printf("\nPrimes up to %d\n", n);
 	
 	A = malloc( n * sizeof(int) );
 	
@@ -63,7 +62,7 @@ void serialSieve(int n)
 		}
 	}
 	
-	printf("Number of primes:%10d\n", count);
+	printf("Primes:\t%d/%d\n", count, n);
 	
 	free( A );
 	
@@ -77,7 +76,6 @@ void threadedInitSieve(int n, int threadNum)
 	int count;
 	omp_set_num_threads(threadNum);
 	
-	printf("\nPrimes up to %d\n", n);
 	
 	A = malloc( n * sizeof(int) );
 	
@@ -119,7 +117,7 @@ void threadedInitSieve(int n, int threadNum)
 		}
 	}
 	
-	printf("Number of primes:%10d\n", count);
+	printf("Primes:\t%d/%d\n", count, n);
 	
 	free( A );
 	
@@ -133,7 +131,6 @@ void threadedPlusSieve(int n, int threadNum)
 	int count;
 	omp_set_num_threads(threadNum);
 	
-	printf("\nPrimes up to %d\n", n);
 	
 	A = malloc( n * sizeof(int) );
 	
@@ -176,7 +173,7 @@ void threadedPlusSieve(int n, int threadNum)
 		}
 	}
 	
-	printf("Number of primes:%10d\n", count);
+	printf("Primes:\t%d/%d\n", count, n);
 	
 	free( A );
 	
@@ -199,7 +196,7 @@ void callParallelInitSieve( int size, int threadNum )
 	time = timer();
 	threadedInitSieve(size, threadNum);
 	time = timer() - time;
-	printf("%d Threaded time: %9.3lf ms - Init\n", threadNum, time*1e3);
+	printf("%3d Threaded time: %9.3lf ms\n", threadNum, time*1e3);
 }
 
 void callParallelPlusSieve( int size, int threadNum )
@@ -209,15 +206,17 @@ void callParallelPlusSieve( int size, int threadNum )
 	time = timer();
 	threadedPlusSieve(size, threadNum);
 	time = timer() - time;
-	printf("%d Threaded time: %9.3lf ms - Plus\n", threadNum, time*1e3);
+	printf("%3d Threaded time: %9.3lf ms\n", threadNum, time*1e3);
 }
 
 void callSieves( int size )
 {
 	callSerialSieve( size );
+	printf("Init:\n");
 	callParallelInitSieve( size, 2 );
 	callParallelInitSieve( size, 4 );
 	callParallelInitSieve( size, 8 );
+	printf("Plus:\n");
 	callParallelPlusSieve( size, 2 );
 	callParallelPlusSieve( size, 4 );
 	callParallelPlusSieve( size, 8 );
