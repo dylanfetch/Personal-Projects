@@ -69,7 +69,7 @@ void serialSieve(int n)
 	
 }
 
-void threadedSieve(int n, int threadNum)
+void threadedInitSieve(int n, int threadNum)
 {
 	int *A;
 	int i;
@@ -94,7 +94,63 @@ void threadedSieve(int n, int threadNum)
 	{
 		if( A[i] == 1)
 		{
-			
+			for( j = i * i; j < n; j = j + i )
+			{
+				A[j] = 0;
+			}
+		}
+	}
+	
+	
+	count = 0;
+	for( i = 1; i < n; i++ )
+	{
+		if( A[i] == 1 )
+		{
+			count++;
+			/*if( count % 8 == 0 )
+			{
+				printf("%10d\n",i);
+			}
+			else
+			{
+				printf("%10d",i);
+			}*/
+		}
+	}
+	
+	printf("Number of primes:%10d\n", count);
+	
+	free( A );
+	
+}
+
+void threadedPlusSieve(int n, int threadNum)
+{
+	int *A;
+	int i;
+	int j;
+	int count;
+	omp_set_num_threads(threadNum);
+	
+	printf("\nPrimes up to %d\n", n);
+	
+	A = malloc( n * sizeof(int) );
+	
+	A[1] = 0;
+	
+	
+	#pragma omp parallel for
+	for( i = 2; i < n; i++ )
+	{
+		A[i] = 1;
+	}
+		
+	for( i = 2; i < sqrt( n ); i++ )
+	{
+		if( A[i] == 1)
+		{
+			#pragma omp parallel for
 			for( j = i * i; j < n; j = j + i )
 			{
 				A[j] = 0;
@@ -136,39 +192,43 @@ void callSerialSieve( int size )
 	printf("Serial time: %9.3lf ms\n", time*1e3);
 }
 
-void callParallelSieve( int size, int threadNum )
+void callParallelInitSieve( int size, int threadNum )
 {
 	double time = 0.0;
 	
 	time = timer();
-	threadedSieve(size, threadNum);
+	threadedInitSieve(size, threadNum);
 	time = timer() - time;
-	printf("%d Threaded time: %9.3lf ms\n", threadNum, time*1e3);
+	printf("%d Threaded time: %9.3lf ms - Init\n", threadNum, time*1e3);
+}
+
+void callParallelPlusSieve( int size, int threadNum )
+{
+	double time = 0.0;
+	
+	time = timer();
+	threadedPlusSieve(size, threadNum);
+	time = timer() - time;
+	printf("%d Threaded time: %9.3lf ms - Plus\n", threadNum, time*1e3);
+}
+
+void callSieves( int size )
+{
+	callSerialSieve( size );
+	callParallelInitSieve( size, 2 );
+	callParallelInitSieve( size, 4 );
+	callParallelInitSieve( size, 8 );
+	callParallelPlusSieve( size, 2 );
+	callParallelPlusSieve( size, 4 );
+	callParallelPlusSieve( size, 8 );
+	printf("\n");
 }
 
 int main()
 {
-	callSerialSieve( 1000000 );
-	callParallelSieve( 1000000, 2 );
-	callParallelSieve( 1000000, 4 );
-	callParallelSieve( 1000000, 8 );
-	printf("\n");
+	callSieves(1000000);
+	callSieves(10000000);
+	callSieves(100000000);
+	callSieves(1000000000);
 	
-	callSerialSieve( 10000000 );
-	callParallelSieve( 10000000, 2 );
-	callParallelSieve( 10000000, 4 );
-	callParallelSieve( 10000000, 8 );
-	printf("\n");
-	
-	callSerialSieve( 100000000 );
-	callParallelSieve( 100000000, 2 );
-	callParallelSieve( 100000000, 4 );
-	callParallelSieve( 100000000, 8 );
-	printf("\n");
-	
-	callSerialSieve( 1000000000 );
-	callParallelSieve( 1000000000, 2 );
-	callParallelSieve( 1000000000, 4 );
-	callParallelSieve( 1000000000, 8 );
-	printf("\n");
 }
