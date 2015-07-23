@@ -126,59 +126,49 @@ void threadedSieve(int n, int threadNum)
 	
 }
 
-int main()
+void callSerialSieve( int size )
 {
 	double time = 0.0;
 	
 	time = timer();
-	serialSieve(100000);
+	serialSieve(size);
 	time = timer() - time;
-	printf("Serial time: %9.3lf ms\n\n", time*1e3);
+	printf("Serial time: %9.3lf ms\n", time*1e3);
+}
+
+void callParallelSieve( int size, int threadNum )
+{
+	double time = 0.0;
 	
 	time = timer();
-	threadedSieve(100000, 4);
+	threadedSieve(size, threadNum);
 	time = timer() - time;
-	printf("Threaded time: %9.3lf ms\n\n", time*1e3);
+	printf("%d Threaded time: %9.3lf ms\n", threadNum, time*1e3);
+}
+
+int main()
+{
+	callSerialSieve( 1000000 );
+	callParallelSieve( 1000000, 2 );
+	callParallelSieve( 1000000, 4 );
+	callParallelSieve( 1000000, 8 );
+	printf("\n");
 	
-	time = timer();
-	serialSieve(1000000);
-	time = timer() - time;
-	printf("Serial time: %9.3lf ms\n\n", time*1e3);
+	callSerialSieve( 10000000 );
+	callParallelSieve( 10000000, 2 );
+	callParallelSieve( 10000000, 4 );
+	callParallelSieve( 10000000, 8 );
+	printf("\n");
 	
-	time = timer();
-	threadedSieve(1000000);
-	time = timer() - time;
-	printf("Threaded time: %9.3lf ms\n\n", time*1e3);
+	callSerialSieve( 100000000 );
+	callParallelSieve( 100000000, 2 );
+	callParallelSieve( 100000000, 4 );
+	callParallelSieve( 100000000, 8 );
+	printf("\n");
 	
-	time = timer();
-	serialSieve(10000000);
-	time = timer() - time;
-	printf("Serial time: %9.3lf ms\n\n", time*1e3);
-	
-	time = timer();
-	threadedSieve(10000000);
-	time = timer() - time;
-	printf("Threaded time: %9.3lf ms\n\n", time*1e3);
-	
-	time = timer();
-	serialSieve(100000000);
-	time = timer() - time;
-	printf("Serial time: %9.3lf ms\n\n", time*1e3);
-	
-	time = timer();
-	threadedSieveSieve(100000000);
-	time = timer() - time;
-	printf("Threaded time: %9.3lf ms\n\n", time*1e3);
-	
-	printf("This one takes a while\n1000ms is 1 second\n");
-	time = timer();
-	serialSieve(1000000000);
-	time = timer() - time;
-	printf("Serial time: %9.3lf ms\n\n", time*1e3);
-	
-	time = timer();
-	threadedSieveSieve(1000000000);
-	time = timer() - time;
-	printf("Threaded time: %9.3lf ms\n\n", time*1e3);
-	
+	callSerialSieve( 1000000000 );
+	callParallelSieve( 1000000000, 2 );
+	callParallelSieve( 1000000000, 4 );
+	callParallelSieve( 1000000000, 8 );
+	printf("\n");
 }
