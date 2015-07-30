@@ -1,5 +1,6 @@
 #include<string.h>
 #include<stdlib.h>
+#include<stdint.h>
 #include<time.h>
 #include<stdio.h>
 #include<math.h>
@@ -68,26 +69,22 @@ void serialSieve(int n)
 	
 }
 
-void threadedInitSieve(int n, int threadNum)
+void serialSieveBetterMem(int n)
 {
-	int *A;
+	uint8_t *A;
 	int i;
 	int j;
 	int count;
-	omp_set_num_threads(threadNum);
 	
-	
-	A = malloc( n * sizeof(int) );
-	
+	printf("here");
+	A = malloc( n * sizeof(uint16_t) );
+	printf("here");
 	A[1] = 0;
-	
-	
-	#pragma omp parallel for
 	for( i = 2; i < n; i++ )
 	{
 		A[i] = 1;
 	}
-		
+	printf("here");
 	for( i = 2; i < sqrt( n ); i++ )
 	{
 		if( A[i] == 1)
@@ -98,7 +95,6 @@ void threadedInitSieve(int n, int threadNum)
 			}
 		}
 	}
-	
 	
 	count = 0;
 	for( i = 1; i < n; i++ )
@@ -123,7 +119,7 @@ void threadedInitSieve(int n, int threadNum)
 	
 }
 
-void threadedPlusSieve(int n, int threadNum)
+void threadedInitSieve(int n, int threadNum)
 {
 	int *A;
 	int i;
@@ -179,6 +175,63 @@ void threadedPlusSieve(int n, int threadNum)
 	
 }
 
+void threadedPlusSieve(int n, int threadNum)
+{
+	uint8_t *A;
+	int i;
+	int j;
+	int count;
+	omp_set_num_threads(threadNum);
+	
+	
+	A = malloc( n * sizeof(uint8_t) );
+	
+	A[1] = 0;
+	
+	
+	#pragma omp parallel for
+	for( i = 2; i < n; i++ )
+	{
+		A[i] = 1;
+	}
+		
+	for( i = 2; i < sqrt( n ); i++ )
+	{
+		if( A[i] == 1)
+		{
+			#pragma omp parallel for
+			for( j = i * i; j < n; j = j + i )
+			{
+				A[j] = 0;
+			}
+		}
+	}
+	
+	
+	count = 0;
+	#pragma omp parallel for reduction(+:count) 
+	for( i = 1; i < n; i++ )
+	{
+		if( A[i] == 1 )
+		{
+			count++;
+			/*if( count % 8 == 0 )
+			{
+				printf("%10d\n",i);
+			}
+			else
+			{
+				printf("%10d",i);
+			}*/
+		}
+	}
+	
+	printf("Primes:\t%d/%d\n", count, n);
+	
+	free( A );
+	
+}
+
 void callSerialSieve( int size )
 {
 	double time = 0.0;
@@ -187,6 +240,16 @@ void callSerialSieve( int size )
 	serialSieve(size);
 	time = timer() - time;
 	printf("Serial time: %9.3lf ms\n", time*1e3);
+}
+
+void callSerialSieveBetterMem( int size )
+{
+	double time = 0.0;
+	
+	time = timer();
+	serialSieveBetterMem(size);
+	time = timer() - time;
+	printf("Serial time Better Mem: %9.3lf ms\n", time*1e3);
 }
 
 void callParallelInitSieve( int size, int threadNum )
@@ -212,6 +275,7 @@ void callParallelPlusSieve( int size, int threadNum )
 void callSieves( int size )
 {
 	callSerialSieve( size );
+	callSerialSieveBetterMem( size );
 	printf("Init:\n");
 	callParallelInitSieve( size, 2 );
 	callParallelInitSieve( size, 4 );
